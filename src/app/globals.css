@@ -31,3 +31,37 @@ body {
     text-wrap: balance;
   }
 }
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;
+  /* 1 */
+  background-color: transparent;
+  /* 2 */
+  background-image: none;
+  /* 2 */
+}
+
+::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+  border-radius: 10px;
+  background-color: rgb(236, 236, 236);
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+  border: none;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #191a19;
+  border-radius: 10px;
+}
+
+p {
+  font-size: 16px;
+  font-family: var(--font-roboto);
+}
