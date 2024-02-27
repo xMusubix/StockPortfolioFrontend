@@ -1,205 +1,90 @@
 "use client";
 
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
-  Button,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Divider,
   Grid,
-  IconButton,
-  Slide,
-  Slider,
-  Stack,
-  Typography,
+  Typography
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { GainTable } from "./_components/gain_table";
-import { SummeryOtherDetails, TotalHolding } from "./_components/summary";
-import DataGrid, {
-  Column,
-  ColumnChooser,
-  ColumnFixing,
-  Item,
-  LoadPanel,
-  Scrolling,
-  Toolbar,
-} from "devextreme-react/data-grid";
-import { styled } from "@mui/system";
-import { FormatValue, ReturnDetailsNoText } from "./_components/details";
-import { FiRefreshCw } from "react-icons/fi";
-import { IoMdAddCircle, IoIosRemoveCircle } from "react-icons/io";
-import { forwardRef, useState } from "react";
-import { TransitionProps } from "@mui/material/transitions";
-import { DataGridCustomStyle } from "./_components/styled";
+import { useEffect, useState } from "react";
+import {
+  LoadAssetsList,
+  LoadDashboardData,
+  LoadSummaryAssetsData,
+} from "./_api/api_stock";
+import { AssetsTable } from "./_components/assets_table";
 import {
   AddAssetsDialog,
   AssetsTransactionDialog,
   ExchangeTransactionDialog,
 } from "./_components/dialog";
-import { AssetsTable } from "./_components/assets_table";
+import { GainTable } from "./_components/gain_table";
+import {
+  SummaryDashboard,
+  SummeryOtherDetails,
+} from "./_components/summary_dashboard";
 
-const summaryData = {
-  totalUsd: 1234.0,
-  usdPercent: 18.13,
-  usdValue: 6306.39,
-  totalThb: 11234.0,
-  thbPercent: 22.13,
-  thbValue: 10000.39,
+type DashboardDataType = {
+  totalHoldingUSD: number;
+  totalHoldingTHB: number;
+  totalCostTHB: number;
+  totalCostUSD: number;
+  changeUSD: number;
+  changeTHB: number;
+  changePercentageUSD: number;
+  changePercentageTHB: number;
+  avgDividendYield: number;
+  avgExchangeRate: number;
+  exchangeRate: number;
+  topGainers: [];
+  topLosers: [];
 };
-
-const otherData = {
-  dailyPercent: 18.13,
-  dailyValue: 6306.39,
-  annualDividendYield: "1.58%",
-  avgExRate: 34.63,
-  exRate: 35.63,
-};
-
-const gainData = [
-  { symbol: "AAPL", percent: 0.3, value: 1.3 },
-  { symbol: "TSLA", percent: -0.5, value: -1.5 },
-  { symbol: "TSLA", percent: 0, value: 0 },
-  { symbol: "TSLA", percent: -0.3, value: -1.3 },
-  { symbol: "TSLA", percent: -0.3, value: -1.3 },
-  { symbol: "AAPL", percent: 0.3, value: 1.3 },
-  { symbol: "TSLA", percent: -0.3, value: -1.3 },
-  { symbol: "TSLA", percent: -0.3, value: -1.3 },
-];
-
-const loseData = [
-  { symbol: "AAPL", percent: 0.3, value: 1.3 },
-  { symbol: "TSLA", percent: -0.3, value: -1.3 },
-  { symbol: "TSLA", percent: -0.3, value: -1.3 },
-  { symbol: "TSLA", percent: -0.3, value: -1.3 },
-  { symbol: "TSLA", percent: -0.3, value: -1.3 },
-  { symbol: "AAPL", percent: 0.3, value: 1.3 },
-  { symbol: "TSLA", percent: -0.3, value: -1.3 },
-  { symbol: "TSLA", percent: -0.3, value: -1.3 },
-];
-
-const summaryAssets = {
-  updateTime: "21/02/2024 21:51:20",
-  assetsCount: 54,
-  target: 100,
-  actual: 90,
-  minScore: 0,
-  maxScore: 10,
-};
-
-const mockAssetsData = [
-  {
-    id: "1",
-    symbol: "AAPL",
-    industryName: "industryName",
-    sectorName: "sectorName",
-    score: 10,
-    state: "up",
-    line: "100%",
-    totalShare: 1000,
-    averagePrice: 5000,
-    lastPrice: 80,
-    actualValue: 5000,
-    costGain: 20.56,
-    costGainValue: 20,
-    costValue: 165,
-    lastPriceChangePercentage: 3.25,
-    dividendYieldPercentage: 4,
-    different: 5000,
-    target: 50,
-    actualPercentage: 50,
-    ytdPrice: 60,
-    wkPrice1: 55,
-    moPrice1: 58,
-    moPrice3: 62,
-    moPrice6: 65,
-    yearPrice1: 70,
-    yearHigh: 75,
-    yearLow: 45,
-    percentYear: 70,
-    note: "Mock note for testing purposes",
-  },
-  {
-    id: "2",
-    symbol: "TSLA",
-    industryName: "industryName",
-    sectorName: "sectorName",
-    score: 3,
-    state: "up",
-    line: "100%",
-    totalShare: 1000,
-    averagePrice: 5000,
-    lastPrice: 80,
-    actualValue: 5000,
-    costGain: 150.98,
-    costGainValue: 1000,
-    costValue: 985,
-    lastPriceChangePercentage: 61.25,
-    dividendYieldPercentage: 4,
-    different: 5000,
-    target: 50,
-    actualPercentage: 50,
-    ytdPrice: 60,
-    wkPrice1: 55,
-    moPrice1: 58,
-    moPrice3: 62,
-    moPrice6: 65,
-    yearPrice1: 70,
-    yearHigh: 75,
-    yearLow: 45,
-    percentYear: 70,
-    note: "Mock note for testing purposes",
-  },
-  {
-    id: "3",
-    symbol: "NVDA",
-    industryName: "industryName",
-    sectorName: "sectorName",
-    score: 8,
-    state: "up",
-    line: "100%",
-    totalShare: 1000,
-    averagePrice: 5000,
-    lastPrice: 80,
-    actualValue: 5000,
-    costGain: -100.56,
-    costGainValue: -1000,
-    costValue: 100,
-    lastPriceChangePercentage: 8.25,
-    dividendYieldPercentage: 4,
-    different: 5000,
-    target: 50,
-    actualPercentage: 50,
-    ytdPrice: 60,
-    wkPrice1: -55,
-    moPrice1: 58,
-    moPrice3: 62,
-    moPrice6: -65,
-    yearPrice1: 70,
-    yearHigh: 750,
-    yearLow: 45,
-    percentYear: 524,
-    note: "Mock note for testing purposes",
-  },
-];
 
 const StockPortfolio = (props: any) => {
   const [exchangeTransactionDialogState, setExchangeTransactionDialogState] =
     useState(false);
   const [transactionDialogState, setTransactionDialogState] = useState(false);
   const [addAssetsDialogState, setAddAssetsDialogState] = useState(false);
-  const [assetsToView, setAssetsToView] = useState(null);
+  const [assetsToView, setAssetsToView] = useState({});
+  const [tableData, setTableData] = useState([]);
+  const [summaryAssets, setSummaryAssets] = useState({});
+  const [dashboard, setDashboard] = useState<DashboardDataType>();
+  const [tableSize, setTableSize] = useState(440);
 
-  const openTransactionDialog = (assetsId: any) => {
-    setAssetsToView(assetsId);
+  const openTransactionDialog = (
+    assetsId: any,
+    symbol: any,
+    marketSymbol: any
+  ) => {
+    setAssetsToView({
+      id: assetsId,
+      symbol: symbol,
+      marketSymbol: marketSymbol,
+    });
     setTransactionDialogState(true);
+  };
+
+  useEffect(() => {
+    LoadAssets();
+    const intervalId = setInterval(() => {
+      LoadAssets();
+    }, 60000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    LoadAssets();
+  }, [transactionDialogState]);
+
+  const LoadAssets = () => {
+    LoadAssetsList(setTableData);
+    LoadSummaryAssetsData(setSummaryAssets);
+    LoadDashboardData(setDashboard);
   };
 
   return (
@@ -209,6 +94,13 @@ const StockPortfolio = (props: any) => {
         sx={{
           marginBottom: "20px",
           borderRadius: "8px",
+        }}
+        onChange={(e, expanded) => {
+          if (expanded) {
+            setTableSize(440);
+          } else {
+            setTableSize(730);
+          }
         }}
       >
         <AccordionSummary
@@ -240,7 +132,7 @@ const StockPortfolio = (props: any) => {
                   placeSelf: "center",
                 }}
               >
-                <TotalHolding data={summaryData} />
+                {dashboard ? <SummaryDashboard data={dashboard} /> : <></>}
               </Grid>
               <Grid
                 item
@@ -250,7 +142,7 @@ const StockPortfolio = (props: any) => {
                   placeSelf: "center",
                 }}
               >
-                <SummeryOtherDetails data={otherData} />
+                {dashboard ? <SummeryOtherDetails data={dashboard} /> : <></>}
               </Grid>
               <Grid
                 item
@@ -262,12 +154,19 @@ const StockPortfolio = (props: any) => {
                   borderTop: "3px dashed #8B8B8B",
                 }}
               >
-                <GainTable
-                  data={[
-                    { title: "Top Gainers", tableData: gainData },
-                    { title: "Top Losers", tableData: loseData },
-                  ]}
-                />
+                {dashboard ? (
+                  <GainTable
+                    data={[
+                      {
+                        title: "Top Gainers",
+                        tableData: dashboard?.topGainers,
+                      },
+                      { title: "Top Losers", tableData: dashboard?.topLosers },
+                    ]}
+                  />
+                ) : (
+                  <></>
+                )}
               </Grid>
             </Grid>
           </Box>
@@ -283,7 +182,9 @@ const StockPortfolio = (props: any) => {
             <CardContent>
               <Box>
                 <AssetsTable
-                  mockAssetsData={mockAssetsData}
+                  tableSize={tableSize}
+                  tableData={tableData}
+                  LoadAssets={LoadAssets}
                   summaryAssets={summaryAssets}
                   setExchangeTransactionDialogState={
                     setExchangeTransactionDialogState
@@ -297,7 +198,7 @@ const StockPortfolio = (props: any) => {
         </Box>
       </div>
       <AssetsTransactionDialog
-        assetsId={assetsToView}
+        assets={assetsToView}
         transactionDialogState={transactionDialogState}
         setTransactionDialogState={setTransactionDialogState}
       />
@@ -308,6 +209,7 @@ const StockPortfolio = (props: any) => {
       <AddAssetsDialog
         addAssetsDialogState={addAssetsDialogState}
         setAddAssetsDialogState={setAddAssetsDialogState}
+        LoadAssets={LoadAssets}
       />
     </div>
   );

@@ -1,18 +1,45 @@
 import http from "@/app/_components/http";
 
-export const AddSymbol = async (props: any) => {
-  const symbolValue = props.symbolValue;
-  await http
-    .post(`${"/api/v1/watchlist/save"}`, null, {
-      params: { symbolValue },
-    })
-    .then((res: any) => {
-      //Todo load Symbol Data
-    });
+export const AddSymbol = async (
+  symbol: any,
+  setSymbol: any,
+  setDialog: any,
+  setDialogMessage: any,
+  setWatchlistDatas: any,
+  setSectorDatas: any
+) => {
+  try {
+    await http
+      .post(`${"/api/v1/watchlist/save"}`, null, {
+        params: { symbol },
+      })
+      .then((res: any) => {
+        LoadSymbolData(setWatchlistDatas);
+        LoadSectorData(setSectorDatas);
+        setDialogMessage("Success");
+        setDialog(true);
+        setSymbol("");
+      })
+      .catch((error: any) => {
+        setDialogMessage(
+          error.response.status !== 400 ? "Unknown Error" : error.response.data
+        );
+        setDialog(true);
+      });
+  } catch (error: any) {
+    setDialogMessage("Unknown Error");
+    setDialog(true);
+  }
 };
 
-export const LoadSymbolData = async (props: any) => {
+export const LoadSymbolData = async (setDatas: any) => {
   await http.get(`${"/api/v1/watchlist/load"}`).then((res: any) => {
-    //Todo return Symbol Data
+    setDatas(res.data);
+  });
+};
+
+export const LoadSectorData = async (setDatas: any) => {
+  await http.get(`${"/api/v1/industry/load"}`).then((res: any) => {
+    setDatas(res.data);
   });
 };

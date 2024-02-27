@@ -69,15 +69,17 @@ export const FormatValue = (props: any) => {
         style={{ fontSize: textSize, lineHeight: textSize / 14 }}
       >
         {symbol}
-        {value < 0
-          ? Math.abs(value).toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })
-          : value.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+        {value
+          ? value < 0
+            ? Math.abs(value).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })
+            : value.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })
+          : 0}
         {last}
       </p>
     );
@@ -103,7 +105,27 @@ export const OtherDetails = (props: any) => {
     <div style={{ minHeight: 80, display: "flex", alignItems: "center" }}>
       <div>
         <div>
-          <p className={`text-[22px] text-[white]`}>{value}</p>
+          <p className={`text-[22px] text-[white]`}>{value.toFixed(2)}</p>
+        </div>
+        {text.map((line: string) => (
+          <div key={line}>
+            <p className="text-[12px] text-[#bdbdbd]">{line}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+export const OtherDetailsPercent = (props: any) => {
+  const { value, text } = props;
+
+  return (
+    <div style={{ minHeight: 80, display: "flex", alignItems: "center" }}>
+      <div>
+        <div>
+          <p className={`text-[22px] text-[white]`}>{value.toFixed(2)}%</p>
         </div>
         {text.map((line: string) => (
           <div key={line}>

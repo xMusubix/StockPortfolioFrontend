@@ -63,12 +63,12 @@ const SectorIndestryTable = (props: any) => {
                   Industry
                 </Typography>
                 <List component="ul">
-                  {row.industry.map((industry: any) => (
+                  {row.industryList.map((industry: any) => (
                     <ListItem key={industry.id} disablePadding>
                       <GoDotFill />
                       <ListItemText
                         className="pl-3"
-                        primary={industry.industry}
+                        primary={industry.industryName}
                       />
                     </ListItem>
                   ))}

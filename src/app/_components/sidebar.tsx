@@ -62,10 +62,9 @@ export default function Sidebar({ show, setter }: any) {
           <MenuItem name="Dashboard" route="/" icon={<MdDashboard />} />
           <MenuItem name="Stock" route="/stock" icon={<IoMdPie />} />
           <MenuItem name="Heat Map" route="/hats" icon={<IoMdGrid />} />
-          <MenuItem name="Calendar" route="/about" icon={<FaCalendarAlt />} />
-          <MenuItem name="Dividend" route="/contact" icon={<GiCash />} />
+          <MenuItem name="Dividend" route="/dividend" icon={<GiCash />} />
           <MenuItem name="E-Class" route="/contact" icon={<BiSolidBank />} />
-          <MenuItem name="Saving" route="/contact" icon={<MdSavings />} />
+          <MenuItem name="Saving" route="/saving" icon={<MdSavings />} />
           <MenuItem name="Setup" route="/setup" icon={<FaGear />} />
         </div>
       </div>

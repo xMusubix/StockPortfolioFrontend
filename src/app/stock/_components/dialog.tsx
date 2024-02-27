@@ -8,18 +8,20 @@ import {
   DialogTitle,
   FormControl,
   IconButton,
+  Input,
   InputLabel,
   MenuItem,
   OutlinedInput,
   Select,
   SelectChangeEvent,
   Slide,
+  TextField,
   Theme,
   useTheme,
 } from "@mui/material";
 import { Box, Stack, styled } from "@mui/system";
 import { IoIosRemoveCircle, IoMdAddCircle } from "react-icons/io";
-import { BootstrapDialog, DataGridCustomStyle } from "./styled";
+import { BootstrapDialog, DataGridCustomStyle } from "../../_components/styled";
 import DataGrid, {
   Column,
   ColumnChooser,
@@ -30,194 +32,80 @@ import DataGrid, {
   Toolbar,
 } from "devextreme-react/data-grid";
 import { TransitionProps } from "@mui/material/transitions";
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { TbArrowsExchange } from "react-icons/tb";
-
-const mockTransactionData = [
-  {
-    id: 1,
-    date: "20/02/2024",
-    type: "Buy",
-    shares: 0.00000005,
-    price: 30.59,
-    fee: 0.01,
-  },
-  {
-    id: 2,
-    date: "21/02/2024",
-    type: "Sell",
-    shares: 0.00000006,
-    price: 31.72,
-    fee: 0.02,
-  },
-  {
-    id: 3,
-    date: "22/02/2024",
-    type: "Buy",
-    shares: 0.00000007,
-    price: 32.85,
-    fee: 0.03,
-  },
-  {
-    id: 4,
-    date: "23/02/2024",
-    type: "Sell",
-    shares: 0.00000008,
-    price: 33.98,
-    fee: 0.04,
-  },
-  {
-    id: 5,
-    date: "24/02/2024",
-    type: "Buy",
-    shares: 0.00000009,
-    price: 35.11,
-    fee: 0.05,
-  },
-  {
-    id: 6,
-    date: "25/02/2024",
-    type: "Sell",
-    shares: 0.0000001,
-    price: 36.24,
-    fee: 0.06,
-  },
-  {
-    id: 7,
-    date: "26/02/2024",
-    type: "Buy",
-    shares: 0.00000011,
-    price: 37.37,
-    fee: 0.07,
-  },
-  {
-    id: 8,
-    date: "27/02/2024",
-    type: "Sell",
-    shares: 0.00000012,
-    price: 38.5,
-    fee: 0.08,
-  },
-  {
-    id: 9,
-    date: "28/02/2024",
-    type: "Buy",
-    shares: 0.00000013,
-    price: 39.63,
-    fee: 0.09,
-  },
-  {
-    id: 10,
-    date: "29/02/2024",
-    type: "Sell",
-    shares: 0.00000014,
-    price: 40.76,
-    fee: 0.1,
-  },
-  {
-    id: 11,
-    date: "01/03/2024",
-    type: "Buy",
-    shares: 0.00000015,
-    price: 41.89,
-    fee: 0.11,
-  },
-  {
-    id: 12,
-    date: "02/03/2024",
-    type: "Sell",
-    shares: 0.00000016,
-    price: 43.02,
-    fee: 0.12,
-  },
-  {
-    id: 13,
-    date: "03/03/2024",
-    type: "Buy",
-    shares: 0.00000017,
-    price: 44.15,
-    fee: 0.13,
-  },
-  {
-    id: 14,
-    date: "04/03/2024",
-    type: "Sell",
-    shares: 0.00000018,
-    price: 45.28,
-    fee: 0.14,
-  },
-  {
-    id: 15,
-    date: "05/03/2024",
-    type: "Buy",
-    shares: 0.00000019,
-    price: 46.41,
-    fee: 0.15,
-  },
-  {
-    id: 16,
-    date: "06/03/2024",
-    type: "Sell",
-    shares: 0.0000002,
-    price: 47.54,
-    fee: 0.16,
-  },
-  {
-    id: 17,
-    date: "07/03/2024",
-    type: "Buy",
-    shares: 0.00000021,
-    price: 48.67,
-    fee: 0.17,
-  },
-  {
-    id: 18,
-    date: "08/03/2024",
-    type: "Sell",
-    shares: 0.00000022,
-    price: 49.8,
-    fee: 0.18,
-  },
-  {
-    id: 19,
-    date: "09/03/2024",
-    type: "Buy",
-    shares: 0.00000023,
-    price: 50.93,
-    fee: 0.19,
-  },
-  {
-    id: 20,
-    date: "10/03/2024",
-    type: "Sell",
-    shares: 0.00000024,
-    price: 52.06,
-    fee: 0.2,
-  },
-];
-
-const Transition = forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import {
+  DeleteTrc,
+  DeleteTrs,
+  LoadSymbolList,
+  LoadTrcList,
+  LoadTrsList,
+  SaveAssets,
+  SaveTrc,
+  SaveTrs,
+} from "../_api/api_stock";
+import { DesktopDatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import dayjs, { Dayjs } from "dayjs";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { InputMask } from "primereact/inputmask";
+import { IMaskInput } from "react-imask";
+import { NumericFormat, NumericFormatProps } from "react-number-format";
+import { CgLogOff } from "react-icons/cg";
+import {
+  ExRateMaskCustom,
+  NumericFormatTHB,
+  NumericFormatUSD,
+  ShareMaskCustom,
+} from "../../_utils/input_mask";
+import { MenuProps, getStyles } from "../../_utils/selete_style";
+import { FeedTwoTone } from "@mui/icons-material";
+import Decimal from "decimal.js";
+import { Transition } from "@/app/_utils/dialog_utils";
 
 export const AssetsTransactionDialog = (props: any) => {
-  const assetsId = props.assetsId;
+  const assetsId = props.assets.id;
+  const marketSymbol = props.assets.marketSymbol;
+  const symbol = props.assets.symbol;
+  const [tableData, setTableData] = useState([]);
+  const [addTransactionStockDialogState, setAddTransactionStockDialogState] =
+    useState(false);
+
+  useEffect(() => {
+    LoadTrsList(marketSymbol, setTableData);
+  }, [props.transactionDialogState, props.assets]);
+
+  const onSuccess = () => {
+    LoadTrsList(marketSymbol, setTableData);
+  };
+
   const RenderShareCell = (rowData: any) => {
     const displayValue = rowData.displayValue;
-    return displayValue.toLocaleString(undefined, {
-      minimumFractionDigits: 7,
-      maximumFractionDigits: 7,
-    });
+    return displayValue
+      ? displayValue.toLocaleString(undefined, {
+          minimumFractionDigits: 7,
+          maximumFractionDigits: 7,
+        })
+      : null;
+  };
+
+  const RenderFeeCell = (rowData: any) => {
+    const displayValue = rowData.displayValue;
+    return displayValue
+      ? displayValue.toLocaleString(undefined, {
+          minimumFractionDigits: 4,
+          maximumFractionDigits: 4,
+        })
+      : null;
   };
 
   const RenderTransctionActionCell = (rowData: any) => {
     return (
-      <IconButton sx={{ padding: "5px" }}>
+      <IconButton
+        sx={{ padding: "5px" }}
+        onClick={() => {
+          DeleteTrs(rowData.data.id, marketSymbol, onSuccess);
+        }}
+      >
         <IoIosRemoveCircle size={25} color="red" />
       </IconButton>
     );
@@ -231,6 +119,9 @@ export const AssetsTransactionDialog = (props: any) => {
       TransitionComponent={Transition}
       fullWidth={true}
       maxWidth="md"
+      sx={{
+        "& .MuiPaper-root": { borderRadius: "8px" },
+      }}
     >
       <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
         <Stack
@@ -239,7 +130,7 @@ export const AssetsTransactionDialog = (props: any) => {
           justifyContent="space-between"
           alignItems="center"
         >
-          <div>Transaction of {assetsId}</div>
+          <div>Transaction of {symbol}</div>
           <div style={{ marginRight: 40 }} />
           <div>
             <Button
@@ -253,6 +144,7 @@ export const AssetsTransactionDialog = (props: any) => {
                   backgroundColor: "#b3ffc0",
                 },
               }}
+              onClick={() => setAddTransactionStockDialogState(true)}
             >
               Add Transaction
             </Button>
@@ -271,7 +163,7 @@ export const AssetsTransactionDialog = (props: any) => {
                 <Box>
                   <DataGridCustomStyle
                     id="gridContainer"
-                    dataSource={mockTransactionData}
+                    dataSource={tableData}
                     columnAutoWidth={true}
                     keyExpr="id"
                     allowColumnReordering={true}
@@ -304,7 +196,7 @@ export const AssetsTransactionDialog = (props: any) => {
                       caption="Shares"
                       minWidth={160}
                       alignment="center"
-                      dataField="shares"
+                      dataField="share"
                       cellRender={RenderShareCell}
                     />
                     <Column
@@ -318,6 +210,7 @@ export const AssetsTransactionDialog = (props: any) => {
                       minWidth={100}
                       alignment="center"
                       dataField="fee"
+                      cellRender={RenderFeeCell}
                     />
                   </DataGridCustomStyle>
                 </Box>
@@ -326,174 +219,237 @@ export const AssetsTransactionDialog = (props: any) => {
           </Box>
         </div>
       </DialogContent>
+      <AddTransactionStockDialog
+        addTransactionStockDialogState={addTransactionStockDialogState}
+        setAddTransactionStockDialogState={setAddTransactionStockDialogState}
+        marketSymbol={marketSymbol}
+        onSuccess={onSuccess}
+      />
     </BootstrapDialog>
   );
 };
 
-const mockCashTransactionData = [
-  {
-    id: 1,
-    date: "20/02/2024",
-    type: "Buy",
-    exRate: 0.00000005,
-    thb: 30.59,
-    usd: 0.01,
-  },
-  {
-    id: 2,
-    date: "21/02/2024",
-    type: "Sell",
-    exRate: 0.00000006,
-    thb: 31.72,
-    usd: 0.02,
-  },
-  {
-    id: 3,
-    date: "22/02/2024",
-    type: "Buy",
-    exRate: 0.00000007,
-    thb: 32.85,
-    usd: 0.03,
-  },
-  {
-    id: 4,
-    date: "23/02/2024",
-    type: "Sell",
-    exRate: 0.00000008,
-    thb: 33.98,
-    usd: 0.04,
-  },
-  {
-    id: 5,
-    date: "24/02/2024",
-    type: "Buy",
-    exRate: 0.00000009,
-    thb: 35.11,
-    usd: 0.05,
-  },
-  {
-    id: 6,
-    date: "25/02/2024",
-    type: "Sell",
-    exRate: 0.0000001,
-    thb: 36.24,
-    usd: 0.06,
-  },
-  {
-    id: 7,
-    date: "26/02/2024",
-    type: "Buy",
-    exRate: 0.00000011,
-    thb: 37.37,
-    usd: 0.07,
-  },
-  {
-    id: 8,
-    date: "27/02/2024",
-    type: "Sell",
-    exRate: 0.00000012,
-    thb: 38.5,
-    usd: 0.08,
-  },
-  {
-    id: 9,
-    date: "28/02/2024",
-    type: "Buy",
-    exRate: 0.00000013,
-    thb: 39.63,
-    usd: 0.09,
-  },
-  {
-    id: 10,
-    date: "29/02/2024",
-    type: "Sell",
-    exRate: 0.00000014,
-    thb: 40.76,
-    usd: 0.1,
-  },
-  {
-    id: 11,
-    date: "01/03/2024",
-    type: "Buy",
-    exRate: 0.00000015,
-    thb: 41.89,
-    usd: 0.11,
-  },
-  {
-    id: 12,
-    date: "02/03/2024",
-    type: "Sell",
-    exRate: 0.00000016,
-    thb: 43.02,
-    usd: 0.12,
-  },
-  {
-    id: 13,
-    date: "03/03/2024",
-    type: "Buy",
-    exRate: 0.00000017,
-    thb: 44.15,
-    usd: 0.13,
-  },
-  {
-    id: 14,
-    date: "04/03/2024",
-    type: "Sell",
-    exRate: 0.00000018,
-    thb: 45.28,
-    usd: 0.14,
-  },
-  {
-    id: 15,
-    date: "05/03/2024",
-    type: "Buy",
-    exRate: 0.00000019,
-    thb: 46.41,
-    usd: 0.15,
-  },
-  {
-    id: 16,
-    date: "06/03/2024",
-    type: "Sell",
-    exRate: 0.0000002,
-    thb: 47.54,
-    usd: 0.16,
-  },
-  {
-    id: 17,
-    date: "07/03/2024",
-    type: "Buy",
-    exRate: 0.00000021,
-    thb: 48.67,
-    usd: 0.17,
-  },
-  {
-    id: 18,
-    date: "08/03/2024",
-    type: "Sell",
-    exRate: 36.5,
-    thb: 49.8,
-    usd: 0.18,
-  },
-  {
-    id: 19,
-    date: "09/03/2024",
-    type: "Buy",
-    exRate: 36.5,
-    thb: 50.93,
-    usd: 0.19,
-  },
-  {
-    id: 20,
-    date: "10/03/2024",
-    type: "Sell",
-    exRate: 36.5,
-    thb: 52.06,
-    usd: 0.2,
-  },
-];
+export const AddTransactionStockDialog = (props: any) => {
+  const [date, setDate] = useState<string | null>(
+    dayjs(new Date()).format("YYYY-MM-DD")
+  );
+  const [type, setType] = useState("Buy");
+  const [share, setShare] = useState<string>("");
+  const [price, setPrice] = useState<string>("");
+  const [fee, setFee] = useState<string>("0.01");
+
+  useEffect(() => {
+    if (price !== "") {
+      if (type !== "Dividend" && share !== "") {
+        var fee = new Decimal(0.0);
+        let priceValue = new Decimal(price);
+        let shareValue = new Decimal(share);
+        fee = priceValue.times(shareValue);
+        Decimal.set({ precision: 1, rounding: Decimal.ROUND_UP });
+        fee = fee.times(0.0015);
+        Decimal.set({ precision: 4, rounding: Decimal.ROUND_DOWN });
+        fee = fee.plus(fee.times(0.07)).minus(0.0001);
+        setFee(fee.toFixed(4, Decimal.ROUND_DOWN));
+      } else {
+        var fee = new Decimal(0.0);
+        let priceValue = new Decimal(price);
+        fee = priceValue.times(0.15);
+        setFee(fee.toFixed(2, Decimal.ROUND_DOWN));
+      }
+    }
+  }, [price, share]);
+
+  useEffect(() => {
+    if (type === "Dividend") {
+      setShare("");
+    }
+  }, [type]);
+
+  const saveTrs = () => {
+    setShare("");
+    setPrice("");
+    setFee("0.01");
+    SaveTrs(
+      {
+        marketSymbol: props.marketSymbol,
+        date: date,
+        type: type,
+        share: share ? share : "0",
+        price: price,
+        fee: fee,
+      },
+      props.onSuccess
+    );
+  };
+
+  useEffect(() => {
+    setShare("");
+    setPrice("");
+    setFee("0.01");
+    setType("Buy");
+  }, [props.addTransactionStockDialogState]);
+
+  return (
+    <BootstrapDialog
+      onClose={() => {
+        props.setAddTransactionStockDialogState(false);
+      }}
+      aria-labelledby="customized-dialog-title"
+      open={props.addTransactionStockDialogState}
+      TransitionComponent={Transition}
+      fullWidth={true}
+      maxWidth="sm"
+      sx={{
+        "& .MuiPaper-root": { borderRadius: "8px" },
+      }}
+    >
+      <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+        <p className="text-[20px]">Add Assets</p>
+      </DialogTitle>
+      <DialogContent>
+        <div className="mb-5">
+          <Box
+            sx={{
+              display: "grid",
+            }}
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Stack spacing={3} alignItems="center" sx={{ marginTop: 2 }}>
+              <FormControl fullWidth>
+                <LocalizationProvider
+                  dateAdapter={AdapterDayjs}
+                  adapterLocale="th"
+                >
+                  <DesktopDatePicker
+                    label="Exchange Date"
+                    defaultValue={dayjs(new Date())}
+                    onChange={(newDate) => {
+                      const formatDate = newDate
+                        ? dayjs(newDate).format("YYYY-MM-DD")
+                        : "";
+                      setDate(formatDate);
+                    }}
+                    format="DD/MM/YYYY"
+                  />
+                </LocalizationProvider>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel id="type">Type</InputLabel>
+                <Select
+                  value={type}
+                  label="Type"
+                  onChange={(event) => setType(event.target.value as string)}
+                  defaultValue="Buy"
+                >
+                  <MenuItem value={"Buy"}>Buy</MenuItem>
+                  <MenuItem value={"Sell"}>Sell</MenuItem>
+                  <MenuItem value={"Dividend"}>Dividend</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth variant="standard">
+                <TextField
+                  label="Share"
+                  value={share}
+                  onChange={(event) =>
+                    setShare(
+                      isNaN(parseFloat(event.target.value))
+                        ? ""
+                        : event.target.value
+                    )
+                  }
+                  disabled={type === "Dividend" ? true : false}
+                  name="numberformat"
+                  id="share"
+                  InputProps={{
+                    inputComponent: ShareMaskCustom as any,
+                  }}
+                  variant="outlined"
+                />
+              </FormControl>
+              <Stack
+                direction="row"
+                spacing={2}
+                sx={{ "&.MuiStack-root": { width: "360px !important" } }}
+              >
+                <FormControl variant="standard">
+                  <TextField
+                    label="Price"
+                    value={price}
+                    onChange={(event) =>
+                      setPrice(
+                        isNaN(parseFloat(event.target.value))
+                          ? ""
+                          : event.target.value
+                      )
+                    }
+                    name="numberformat"
+                    id="price"
+                    InputProps={{
+                      inputComponent: NumericFormatUSD as any,
+                    }}
+                    variant="outlined"
+                  />
+                </FormControl>
+
+                <FormControl variant="standard">
+                  <TextField
+                    label="Fee"
+                    value={fee}
+                    onChange={(event) =>
+                      setFee(
+                        isNaN(parseFloat(event.target.value))
+                          ? ""
+                          : event.target.value
+                      )
+                    }
+                    name="numberformat"
+                    id="fee"
+                    InputProps={{
+                      inputComponent: NumericFormatUSD as any,
+                    }}
+                    variant="outlined"
+                  />
+                </FormControl>
+              </Stack>
+              <div style={{ widows: 100, justifySelf: "center" }}>
+                <Button
+                  variant="contained"
+                  startIcon={<IoMdAddCircle />}
+                  sx={{
+                    "&.MuiButtonBase-root": {
+                      backgroundColor: "#42a5f5",
+                    },
+                    "&.MuiButtonBase-root:hover": {
+                      backgroundColor: "#b3ffc0",
+                    },
+                  }}
+                  onClick={saveTrs}
+                >
+                  Add Transaction
+                </Button>
+              </div>
+            </Stack>
+          </Box>
+        </div>
+      </DialogContent>
+    </BootstrapDialog>
+  );
+};
 
 export const ExchangeTransactionDialog = (props: any) => {
+  const [trcDatas, setTrcDatas] = useState([]);
+  const [addExchangeTransactionState, setAddExchangeTransactionState] =
+    useState(false);
+
+  useEffect(() => {
+    LoadTrcList(setTrcDatas);
+  }, [addExchangeTransactionState, props.exchangeTransactionDialogState]);
+
+  const onSuccess = () => {
+    LoadTrcList(setTrcDatas);
+  };
+
   const RenderExRateCell = (rowData: any) => {
     const displayValue = rowData.displayValue;
     return displayValue.toLocaleString(undefined, {
@@ -539,7 +495,12 @@ export const ExchangeTransactionDialog = (props: any) => {
 
   const RenderTransctionActionCell = (rowData: any) => {
     return (
-      <IconButton sx={{ padding: "5px" }}>
+      <IconButton
+        sx={{ padding: "5px" }}
+        onClick={() => {
+          DeleteTrc(rowData.data.id, onSuccess);
+        }}
+      >
         <IoIosRemoveCircle size={25} color="red" />
       </IconButton>
     );
@@ -553,6 +514,9 @@ export const ExchangeTransactionDialog = (props: any) => {
       TransitionComponent={Transition}
       fullWidth={true}
       maxWidth="md"
+      sx={{
+        "& .MuiPaper-root": { borderRadius: "8px" },
+      }}
     >
       <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
         <Stack
@@ -575,6 +539,7 @@ export const ExchangeTransactionDialog = (props: any) => {
                   backgroundColor: "#b3ffc0",
                 },
               }}
+              onClick={() => setAddExchangeTransactionState(true)}
             >
               Add Transaction
             </Button>
@@ -593,7 +558,7 @@ export const ExchangeTransactionDialog = (props: any) => {
                 <Box>
                   <DataGridCustomStyle
                     id="gridContainer"
-                    dataSource={mockCashTransactionData}
+                    dataSource={trcDatas}
                     columnAutoWidth={true}
                     keyExpr="id"
                     allowColumnReordering={true}
@@ -656,85 +621,230 @@ export const ExchangeTransactionDialog = (props: any) => {
           </Box>
         </div>
       </DialogContent>
+      <AddExchangeTransactionDialog
+        addExchangeTransactionState={addExchangeTransactionState}
+        setAddExchangeTransactionState={setAddExchangeTransactionState}
+        onSuccess={onSuccess}
+      />
     </BootstrapDialog>
   );
 };
 
-const symbols = [
-  "AAPL",
-  "TSLA",
-  "GOOGL",
-  "MSFT",
-  "AMZN",
-  "FB",
-  "NVDA",
-  "NFLX",
-  "INTC",
-  "ADBE",
-  "CRM",
-  "PYPL",
-  "QCOM",
-  "CSCO",
-  "AMD",
-  "AMGN",
-  "COST",
-  "SBUX",
-  "TXN",
-  "AVGO",
-  "BKNG",
-  "CMCSA",
-  "GILD",
-  "JD",
-  "MU",
-  "INTU",
-  "ATVI",
-  "TMUS",
-  "ADI",
-  "BIIB",
-];
+export const AddExchangeTransactionDialog = (props: any) => {
+  const [exchangeDate, setExchangeDate] = useState<string | null>(
+    dayjs(new Date()).format("YYYY-MM-DD")
+  );
+  const [type, setType] = useState("ExchangeToUSD");
+  const [exRate, setExRate] = useState<number | string>();
+  const [thb, setThb] = useState<number | string>();
+  const [usd, setUsd] = useState<number | string>();
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 7 + ITEM_PADDING_TOP,
-      width: 100,
-    },
-  },
-};
-
-function getStyles(symbol: string, symbols: readonly string[], theme: Theme) {
-  return {
-    fontWeight:
-      symbols.indexOf(symbol) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
+  const saveTrc = () => {
+    setExRate("");
+    setThb("");
+    setUsd("");
+    SaveTrc(
+      {
+        date: exchangeDate,
+        type: type,
+        exRate: exRate,
+        thb: thb,
+        usd: usd,
+      },
+      props.onSuccess
+    );
   };
-}
+
+  useEffect(() => {
+    setExRate("");
+    setThb("");
+    setUsd("");
+  }, [props.addExchangeTransactionState]);
+
+  return (
+    <BootstrapDialog
+      onClose={() => {
+        props.setAddExchangeTransactionState(false);
+      }}
+      aria-labelledby="customized-dialog-title"
+      open={props.addExchangeTransactionState}
+      TransitionComponent={Transition}
+      fullWidth={true}
+      maxWidth="sm"
+      sx={{
+        "& .MuiPaper-root": { borderRadius: "8px" },
+      }}
+    >
+      <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+        <p className="text-[20px]">Add Assets</p>
+      </DialogTitle>
+      <DialogContent>
+        <div className="mb-5">
+          <Box
+            sx={{
+              display: "grid",
+            }}
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Stack spacing={3} alignItems="center" sx={{ marginTop: 2 }}>
+              <FormControl fullWidth>
+                <LocalizationProvider
+                  dateAdapter={AdapterDayjs}
+                  adapterLocale="th"
+                >
+                  <DesktopDatePicker
+                    label="Exchange Date"
+                    defaultValue={dayjs(new Date())}
+                    onChange={(newDate) => {
+                      const formatDate = newDate
+                        ? dayjs(newDate).format("YYYY-MM-DD")
+                        : "";
+                      setExchangeDate(formatDate);
+                    }}
+                    format="DD/MM/YYYY"
+                  />
+                </LocalizationProvider>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">Type</InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={type}
+                  label="Type"
+                  onChange={(event) => setType(event.target.value as string)}
+                  defaultValue="ExchangeToUSD"
+                >
+                  <MenuItem value={"ExchangeToUSD"}>Exchange To USD</MenuItem>
+                  <MenuItem value={"ExchangeToTHB"}>Exchange To THB</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth variant="standard">
+                <TextField
+                  label="Exchange Rate"
+                  value={exRate}
+                  onChange={(event) =>
+                    setExRate(
+                      isNaN(parseFloat(event.target.value))
+                        ? ""
+                        : event.target.value
+                    )
+                  }
+                  name="numberformat"
+                  id="exchange-rate"
+                  InputProps={{
+                    inputComponent: ExRateMaskCustom as any,
+                  }}
+                  variant="outlined"
+                />
+              </FormControl>
+              <Stack
+                direction="row"
+                spacing={2}
+                sx={{ "&.MuiStack-root": { width: "360px !important" } }}
+              >
+                <FormControl variant="standard">
+                  <TextField
+                    label="THB"
+                    value={thb}
+                    onChange={(event) =>
+                      setThb(
+                        isNaN(parseFloat(event.target.value))
+                          ? ""
+                          : event.target.value
+                      )
+                    }
+                    name="numberformat"
+                    id="thb"
+                    InputProps={{
+                      inputComponent: NumericFormatTHB as any,
+                    }}
+                    variant="outlined"
+                  />
+                </FormControl>
+
+                <FormControl variant="standard">
+                  <TextField
+                    label="USD"
+                    value={usd}
+                    onChange={(event) =>
+                      setUsd(
+                        isNaN(parseFloat(event.target.value))
+                          ? ""
+                          : event.target.value
+                      )
+                    }
+                    name="numberformat"
+                    id="usd"
+                    InputProps={{
+                      inputComponent: NumericFormatUSD as any,
+                    }}
+                    variant="outlined"
+                  />
+                </FormControl>
+              </Stack>
+              <div style={{ widows: 100, justifySelf: "center" }}>
+                <Button
+                  variant="contained"
+                  startIcon={<IoMdAddCircle />}
+                  sx={{
+                    "&.MuiButtonBase-root": {
+                      backgroundColor: "#42a5f5",
+                    },
+                    "&.MuiButtonBase-root:hover": {
+                      backgroundColor: "#b3ffc0",
+                    },
+                  }}
+                  onClick={saveTrc}
+                >
+                  Add Transaction
+                </Button>
+              </div>
+            </Stack>
+          </Box>
+        </div>
+      </DialogContent>
+    </BootstrapDialog>
+  );
+};
 
 export const AddAssetsDialog = (props: any) => {
   const theme = useTheme();
-  const [symbloList, setSymbloList] = useState<string[]>([]);
+  const [symbolList, setSymbolList] = useState<string[]>([]);
+  const [selectSymbolList, setSelectSymbolList] = useState<string[]>([]);
 
-  const handleChange = (event: SelectChangeEvent<typeof symbloList>) => {
+  useEffect(() => {
+    LoadSymbolList(setSymbolList);
+  }, [props.addAssetsDialogState]);
+
+  const onSuccess = () => {
+    setSelectSymbolList([]);
+    LoadSymbolList(setSymbolList);
+    props.LoadAssets();
+  };
+
+  const handleChange = (event: SelectChangeEvent<typeof symbolList>) => {
     const {
       target: { value },
     } = event;
-    setSymbloList(typeof value === "string" ? value.split(",") : value);
+    setSelectSymbolList(typeof value === "string" ? value.split(",") : value);
   };
 
   return (
     <BootstrapDialog
       onClose={() => {
-        setSymbloList([]);
-        props.setAddAssetsDialogState(false)
-    }}
+        setSelectSymbolList([]);
+        props.setAddAssetsDialogState(false);
+      }}
       aria-labelledby="customized-dialog-title"
       open={props.addAssetsDialogState}
       TransitionComponent={Transition}
       fullWidth={true}
       maxWidth="sm"
+      sx={{
+        "& .MuiPaper-root": { borderRadius: "8px" },
+      }}
     >
       <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
         <p className="text-[20px]">Add Assets</p>
@@ -754,7 +864,7 @@ export const AddAssetsDialog = (props: any) => {
                 labelId="demo-multiple-chip-label"
                 id="demo-multiple-chip"
                 multiple
-                value={symbloList}
+                value={selectSymbolList}
                 onChange={handleChange}
                 input={
                   <OutlinedInput id="select-multiple-chip" label="Symbol" />
@@ -768,11 +878,11 @@ export const AddAssetsDialog = (props: any) => {
                 )}
                 MenuProps={MenuProps}
               >
-                {symbols.map((symbol) => (
+                {symbolList.map((symbol) => (
                   <MenuItem
                     key={symbol}
                     value={symbol}
-                    style={getStyles(symbol, symbols, theme)}
+                    style={getStyles(symbol, symbolList, theme)}
                   >
                     {symbol}
                   </MenuItem>
@@ -791,6 +901,7 @@ export const AddAssetsDialog = (props: any) => {
                     backgroundColor: "#b3ffc0",
                   },
                 }}
+                onClick={() => SaveAssets(selectSymbolList, onSuccess)}
               >
                 Add Assets
               </Button>

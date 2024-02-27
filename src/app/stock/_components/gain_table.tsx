@@ -44,18 +44,24 @@ export const GainTable = ({ data }: any) => {
               >
                 <p className="text-[20px] font-bold">{title}</p>
               </TableCell>
-              {tableData.map(({ symbol, percent, value }: any) => (
-                <TableCell
-                  key={symbol}
-                  sx={{ padding: "7px 7px", borderBottom: "unset" }}
-                >
-                  <TableCellContent
-                    symbol={symbol}
-                    percent={percent}
-                    value={value}
-                  />
-                </TableCell>
-              ))}
+              {tableData.map(
+                ({
+                  symbol,
+                  lastPriceChange,
+                  lastPriceChangePercentage,
+                }: any) => (
+                  <TableCell
+                    key={symbol}
+                    sx={{ padding: "7px 7px", borderBottom: "unset" }}
+                  >
+                    <TableCellContent
+                      symbol={symbol}
+                      percent={lastPriceChangePercentage}
+                      value={lastPriceChange}
+                    />
+                  </TableCell>
+                )
+              )}
             </TableRow>
           ))}
         </TableBody>

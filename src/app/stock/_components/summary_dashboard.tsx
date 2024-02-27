@@ -1,8 +1,14 @@
 import { Card, CardContent, Divider, Grid, Stack } from "@mui/material";
-import { OtherDetails, ReturnDetails, ReturnDetailsNoText } from "./details";
+import {
+  OtherDetails,
+  OtherDetailsPercent,
+  ReturnDetails,
+  ReturnDetailsNoText,
+} from "./details";
 
-export const TotalHolding = (props: any) => {
+export const SummaryDashboard = (props: any) => {
   const data = props.data;
+
   return (
     <Grid
       container
@@ -21,7 +27,7 @@ export const TotalHolding = (props: any) => {
       >
         <p className="text-[40px] font-semibold">
           $
-          {data.totalUsd.toLocaleString(undefined, {
+          {data.totalHoldingUSD.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}
@@ -32,7 +38,7 @@ export const TotalHolding = (props: any) => {
         />
         <p className="text-[40px] font-semibold">
           ฿
-          {data.totalThb.toLocaleString(undefined, {
+          {data.totalHoldingTHB.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}
@@ -48,8 +54,8 @@ export const TotalHolding = (props: any) => {
       >
         <Stack>
           <ReturnDetailsNoText
-            percent={data.usdPercent}
-            value={data.usdValue}
+            percent={data.changePercentageUSD}
+            value={data.changeUSD}
             type="usd"
           />
           <Divider
@@ -57,8 +63,8 @@ export const TotalHolding = (props: any) => {
             sx={{ borderBottom: "3px solid #8B8B8B" }}
           />
           <ReturnDetailsNoText
-            percent={data.thbPercent}
-            value={data.thbValue}
+            percent={data.changePercentageTHB}
+            value={data.changeTHB}
             type="thb"
           />
           <p className="text-[16px]">Total Return</p>
@@ -93,8 +99,8 @@ export const SummeryOtherDetails = (props: any) => {
             }}
           >
             <ReturnDetails
-              percent={data.dailyPercent}
-              value={data.dailyValue}
+              percent={data.changePercentageUSD}
+              value={data.changeUSD}
               text="Daily Return"
               type="usd"
             />
@@ -115,8 +121,8 @@ export const SummeryOtherDetails = (props: any) => {
               placeContent: "center",
             }}
           >
-            <OtherDetails
-              value={data.annualDividendYield}
+            <OtherDetailsPercent
+              value={data.avgDividendYield}
               text={["Estimate", "Annual Dividend Yield"]}
             />
           </CardContent>
@@ -136,7 +142,10 @@ export const SummeryOtherDetails = (props: any) => {
               placeContent: "center",
             }}
           >
-            <OtherDetails value={data.avgExRate} text={["Avg. Ex Rate"]} />
+            <OtherDetails
+              value={data.avgExchangeRate}
+              text={["Avg. Ex Rate"]}
+            />
           </CardContent>
         </Card>
       </Grid>
@@ -154,7 +163,7 @@ export const SummeryOtherDetails = (props: any) => {
               placeContent: "center",
             }}
           >
-            <OtherDetails value={data.exRate} text={["Exchange Rate"]} />
+            <OtherDetails value={data.exchangeRate} text={["Exchange Rate"]} />
           </CardContent>
         </Card>
       </Grid>

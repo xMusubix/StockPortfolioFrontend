@@ -10,11 +10,18 @@ import {
 import { MdDelete } from "react-icons/md";
 
 const WatchlistTable = (props: any) => {
-  const datas = props.data;
-
+  const datas = props.datas;
   return (
     <TableContainer sx={{ minHeight: 700, maxHeight: 700 }}>
-      <Table stickyHeader aria-label="sticky table">
+      <Table
+        stickyHeader
+        aria-label="sticky table"
+        sx={{
+          "& .MuiTableCell-root": {
+            padding: "0px !important",
+          },
+        }}
+      >
         <TableHead>
           <TableRow>
             <TableCell align="center">Market</TableCell>
@@ -26,7 +33,9 @@ const WatchlistTable = (props: any) => {
           {datas.map((data: any) => (
             <TableRow
               key={data.id}
-              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              sx={{
+                "&:last-child td, &:last-child th": { border: 0 },
+              }}
             >
               <TableCell align="center">{data.market}</TableCell>
               <TableCell align="center">{data.symbol}</TableCell>

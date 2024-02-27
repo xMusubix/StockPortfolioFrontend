@@ -1,28 +1,64 @@
-import { Button, Chip, Grid, IconButton, Slider, Stack } from "@mui/material";
+import {
+  Button,
+  Chip,
+  Grid,
+  IconButton,
+  Slider,
+  Stack,
+  TextField,
+} from "@mui/material";
 import {
   Column,
   ColumnChooser,
   ColumnFixing,
+  Editing,
   Item,
   LoadPanel,
+  Paging,
+  Scrolling,
+  SearchPanel,
   Toolbar,
 } from "devextreme-react/data-grid";
 import { FiRefreshCw } from "react-icons/fi";
 import { IoMdAddCircle } from "react-icons/io";
 import { FormatValue, ReturnDetailsNoText } from "./details";
-import { DataGridCustomStyle } from "./styled";
+import { DataGridCustomStyle } from "../../_components/styled";
+import { useEffect, useState } from "react";
+import { LoadAssetsList, UpdateTarget } from "../_api/api_stock";
+import { Tune } from "@mui/icons-material";
+import { constants } from "fs/promises";
+import dayjs from "dayjs";
 
 export const AssetsTable = (props: any) => {
-  const data = props.mockAssetsData;
   const summaryAssets = props.summaryAssets;
+  const [maxDifferent, setMaxDifferent] = useState(0);
+  const [minDifferent, setMinDifferent] = useState(0);
 
-  const renderTargetAndActual = (rowData: any) => {
+  useEffect(() => {
+    setMaxDifferent(
+      Math.max(...props.tableData.map((item: any) => item.different))
+    );
+    setMinDifferent(
+      Math.min(...props.tableData.map((item: any) => item.different))
+    );
+  }, [props.tableData]);
+
+  const onSccess = () => {
+    console.log("Success Update Target");
+    props.LoadAssets();
+  };
+
+  const updateTarget = (id: any, target: any) => {
+    UpdateTarget(id, target, onSccess);
+  };
+
+  const renderHeaderTargetAndActual = (rowData: any) => {
     const caption = rowData.column.caption;
     let value;
     if (caption === "Target") {
       value = summaryAssets.target;
     } else if (caption === "Actual") {
-      value = summaryAssets.actual;
+      value = 100;
     } else {
       value = 0;
     }
@@ -35,10 +71,44 @@ export const AssetsTable = (props: any) => {
             backgroundColor: value === 100 ? "green" : "red",
             height: 20,
             width: 80,
+            "& .MuiChip-label": {
+              padding: "5px",
+            },
           }}
-          label={value.toFixed(2) + "%"}
+          label={value ? value.toFixed(2) + "%" : "0%"}
         />
       </Stack>
+    );
+  };
+
+  const renderTarget = (rowData: any) => {
+    return (
+      <TextField
+        defaultValue={rowData.displayValue}
+        type="number"
+        sx={{
+          right: "-5px",
+          width: "65px",
+          "&.MuiFormControl-root": { border: "none" },
+          "&.MuiTextField-root": {
+            textAlignLast: "center",
+            border: "none",
+            color: "black",
+            borderBottom: 0,
+            "-webkit-text-fill-color": "black",
+            "&:before": {
+              borderBottom: 0,
+            },
+          },
+          "& .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+          },
+        }}
+        InputProps={{ inputProps: { min: 0, max: 100 } }}
+        onBlur={(event) => {
+          updateTarget(rowData.data.id, event.target.value);
+        }}
+      ></TextField>
     );
   };
 
@@ -73,11 +143,41 @@ export const AssetsTable = (props: any) => {
     return `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
   };
 
+  const getColorForDifferent = (value: number) => {
+    if (value > 0) {
+      const min = 0;
+      const max = maxDifferent;
+      const range = max - min;
+      const ratio = value / range;
+      const hue = 120;
+      const saturation = 100 - Math.round(50 * ratio); // reduce saturation from 100 to 50 as value approaches min
+      const lightness = 100 - Math.round(50 * ratio); // reduce lightness from 100 to 50 as value approaches min
+      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    } else if (value < 0) {
+      const min = 0;
+      const max = Math.abs(minDifferent);
+      const range = max - min;
+      const ratio = Math.abs(value) / range;
+      const hue = 0;
+      const saturation = 100 - Math.round(50 * ratio); // reduce saturation from 100 to 50 as value approaches min
+      const lightness = 100 - Math.round(50 * ratio); // reduce lightness from 100 to 50 as value approaches min
+      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    } else {
+      return "white";
+    }
+  };
+
   const RenderActionCell = (rowData: any) => {
     return (
       <IconButton
         sx={{ padding: "5px" }}
-        onClick={() => props.openTransactionDialog(rowData.data.id)}
+        onClick={() =>
+          props.openTransactionDialog(
+            rowData.data.id,
+            rowData.data.symbol,
+            rowData.data.marketSymbol
+          )
+        }
       >
         <IoMdAddCircle size={25} color="#9C27B0" />
       </IconButton>
@@ -86,23 +186,33 @@ export const AssetsTable = (props: any) => {
 
   const RenderPriceCell = (rowData: any) => {
     const displayValue = rowData.displayValue;
-    return (
-      "$" +
-      displayValue.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-    );
+    return displayValue
+      ? "$" +
+          displayValue.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+      : 0;
+  };
+
+  const RenderShareCell = (rowData: any) => {
+    const displayValue = rowData.displayValue;
+    return displayValue
+      ? displayValue.toLocaleString(undefined, {
+          minimumFractionDigits: 7,
+          maximumFractionDigits: 7,
+        })
+      : 0;
   };
 
   const RenderPercentCell = (rowData: any) => {
     const displayValue = rowData.displayValue;
-    return (
-      displayValue.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }) + "%"
-    );
+    return displayValue
+      ? displayValue.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }) + "%"
+      : 0;
   };
 
   const RenderHistoryPercentCell = (rowData: any) => {
@@ -115,7 +225,6 @@ export const AssetsTable = (props: any) => {
   };
 
   const RenderHoldingCell = (rowData: any) => {
-    console.log(rowData.data);
     const costGain = rowData.data.costGain;
     const costGainValue = rowData.data.costGainValue;
     return (
@@ -139,8 +248,7 @@ export const AssetsTable = (props: any) => {
 
   const RenderDailyHoldingCell = (rowData: any) => {
     const lastPricePercentage = rowData.data.lastPriceChangePercentage;
-    const dailyPriceValue =
-      (lastPricePercentage / 100) * rowData.data.costValue;
+    const dailyCostGain = rowData.data.dailyCostGain;
     return (
       <Stack
         direction="row"
@@ -151,7 +259,7 @@ export const AssetsTable = (props: any) => {
         <Stack>
           <ReturnDetailsNoText
             percent={lastPricePercentage}
-            value={dailyPriceValue}
+            value={dailyCostGain}
             type="usd"
             textSize={[16, 14]}
           />
@@ -161,7 +269,6 @@ export const AssetsTable = (props: any) => {
   };
 
   const RenderScoreCell = (rowData: any) => {
-    console.log(rowData.displayValue);
     const value = rowData.displayValue;
     return (
       <Chip
@@ -191,7 +298,7 @@ export const AssetsTable = (props: any) => {
           <Slider
             max={rowData.data.yearHigh}
             min={rowData.data.yearLow}
-            defaultValue={rowData.data.percentYear}
+            defaultValue={rowData.data.lastPrice}
             disabled
             sx={{
               "& .MuiSlider-thumb": {
@@ -211,33 +318,123 @@ export const AssetsTable = (props: any) => {
           />
         </Grid>
         <Grid item xs={3} textAlign="left">
-          <p className="text-[12px]">${rowData.data.yearLow.toFixed(2)}</p>
+          <p className="text-[12px]">
+            ${rowData.data.yearLow ? rowData.data.yearLow.toFixed(2) : 0}
+          </p>
         </Grid>
         <Grid item xs={6}></Grid>
         <Grid item xs={3} textAlign="right">
-          <p className="text-[12px]">${rowData.data.yearHigh.toFixed(2)}</p>
+          <p className="text-[12px]">
+            ${rowData.data.yearHigh ? rowData.data.yearHigh.toFixed(2) : 0}
+          </p>
         </Grid>
       </Grid>
     );
   };
 
+  const RenderDiffentCell = (rowData: any) => {
+    const value = rowData.displayValue;
+    return (
+      <Chip
+        sx={{
+          backgroundColor: getColorForDifferent(value),
+          height: 35,
+          width: 70,
+          "& .MuiChip-label": {
+            color: "#000000",
+            fontSize: "16px",
+            fontWeight: 540,
+          },
+        }}
+        label={value.toFixed(2)}
+      />
+    );
+  };
+
+  const RenderActionHeaderCell = (rowData: any) => {
+    return (
+      <Chip
+        sx={{
+          height: 35,
+          width: 70,
+          "& .MuiChip-label": {
+            color: "#FFFFFF",
+            fontSize: "16px",
+            fontWeight: 540,
+            padding: "5px",
+          },
+        }}
+        label={summaryAssets.assetsCount}
+      />
+    );
+  };
+
+  const RenderExDateCell = (rowData: any) => {
+    const todayDate = dayjs();
+    const today = todayDate;
+    const twoDaysLater = todayDate.add(2, "day");
+    const sevenDaysLater = todayDate.add(7, "day");
+
+    if (rowData.displayValue) {
+      let chipColor = "#A9A9A9"; // สีพื้นหลังเริ่มต้น
+      const displayDate = dayjs(rowData.displayValue);
+
+      if (displayDate === today) {
+        chipColor = "#ff5252"; // สีแดงถ้าเป็นวันนี้
+      } else if (displayDate > today && displayDate <= twoDaysLater) {
+        chipColor = "#ffd600"; // สีเหลืองถ้าเป็น 1 หรือ 2 วันหลังจากวันนี้
+      } else if (displayDate > twoDaysLater && displayDate <= sevenDaysLater) {
+        chipColor = "#4caf50"; // สีเขียวถ้าเป็น 3 ถึง 7 วันหลังจากวันนี้
+      }
+
+      return (
+        <Chip
+          sx={{
+            height: 35,
+            width: 100,
+            backgroundColor: chipColor,
+            "& .MuiChip-label": {
+              color: "#FFFFFF",
+              fontSize: "16px",
+              fontWeight: 540,
+              padding: "5px",
+            },
+          }}
+          label={displayDate.format("DD/MM/YYYY")}
+        />
+      );
+    } else {
+      return null;
+    }
+  };
+
   return (
     <DataGridCustomStyle
       id="gridContainer"
-      dataSource={data}
+      dataSource={props.tableData}
       columnAutoWidth={true}
       keyExpr="id"
       allowColumnReordering={true}
       showBorders={false}
       showRowLines={true}
       showColumnLines={false}
-      height={390}
+      height={props.tableSize}
     >
       <Toolbar>
         <Item location="before">
           <div className="ml-2 mt-[5px]">
             <p className="text-[#FFFFFF]">
-              Update : {summaryAssets.updateTime}
+              Update :{" "}
+              {summaryAssets.updateTime
+                ? new Date(summaryAssets.updateTime).toLocaleString("en-GB", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })
+                : null}
             </p>
           </div>
         </Item>{" "}
@@ -290,26 +487,31 @@ export const AssetsTable = (props: any) => {
               marginRight: 2,
               marginTop: "5px",
             }}
+            onClick={() => props.LoadAssets()}
           >
             <FiRefreshCw size={20} />
           </IconButton>
         </Item>
         <Item name="columnChooserButton" />
+        <Item name="searchPanel" />
       </Toolbar>
       <ColumnFixing enabled={true} />
       <ColumnChooser enabled={true} />
-      <LoadPanel enabled={true} />
+      <Paging enabled={false} />
+      <LoadPanel enabled={false} />
+      <SearchPanel visible={true} width={150} placeholder="Search..." />
       <Column
         minWidth={55}
         width={55}
         alignment="center"
         fixed={true}
         cellRender={RenderActionCell}
+        headerCellRender={RenderActionHeaderCell}
       />
       <Column
         caption="Symbol"
-        minWidth={80}
-        width={80}
+        minWidth={70}
+        width={70}
         alignment="center"
         fixed={true}
         dataField="symbol"
@@ -331,6 +533,7 @@ export const AssetsTable = (props: any) => {
       <Column
         caption="Score"
         minWidth={80}
+        width={80}
         alignment="center"
         dataField="score"
         cellRender={RenderScoreCell}
@@ -356,14 +559,33 @@ export const AssetsTable = (props: any) => {
         alignment="center"
         dataField="averagePrice"
         cellRender={RenderPriceCell}
+        visible={false}
+      />
+      <Column
+        caption="Cost Value"
+        minWidth={100}
+        width={100}
+        alignment="center"
+        dataField="costValue"
+        cellRender={RenderPriceCell}
+        visible={false}
       />
       <Column
         caption="Holding Value"
         minWidth={100}
         width={100}
         alignment="center"
-        dataField="actualValue"
+        dataField="holdingValue"
         cellRender={RenderPriceCell}
+      />
+      <Column
+        caption="Total Share"
+        minWidth={100}
+        width={100}
+        alignment="center"
+        dataField="totalShare"
+        cellRender={RenderShareCell}
+        visible={false}
       />
       <Column
         caption="Holding Gain"
@@ -390,33 +612,47 @@ export const AssetsTable = (props: any) => {
         cellRender={RenderPriceCell}
       />
       <Column
-        caption="Target"
-        minWidth={100}
-        alignment="center"
-        dataField="target"
-        headerCellRender={renderTargetAndActual}
-      />
-      <Column
-        caption="Actual"
-        minWidth={100}
-        alignment="center"
-        dataField="actualPercentage"
-        headerCellRender={renderTargetAndActual}
-      />
-      <Column
-        caption="Different"
-        minWidth={100}
-        alignment="center"
-        dataField="different"
-        cellRender={RenderPriceCell}
-      />
-      <Column
         caption="Dividend Yield"
         minWidth={80}
         width={80}
         alignment="center"
-        dataField="dividendYieldPercentage"
+        dataField="dividendYield"
         cellRender={RenderPercentCell}
+      />
+      <Column
+        caption="Dividend Ex-Date"
+        minWidth={120}
+        width={120}
+        alignment="center"
+        dataField="exDate"
+        dataType="date"
+        format="dd/MM/yyyy"
+        cellRender={RenderExDateCell}
+        headerCellRender={() => (
+          <div style={{ whiteSpace: "nowrap" }}>
+            Dividend
+            <br />
+            Ex-Date
+          </div>
+        )}
+      />
+      <Column
+        caption="Dividend Amount"
+        minWidth={80}
+        width={80}
+        alignment="center"
+        dataField="dividendAmount"
+        cellRender={RenderPriceCell}
+        visible={false}
+      />
+      <Column
+        caption="Payout Ratio"
+        minWidth={80}
+        width={80}
+        alignment="center"
+        dataField="payoutRatio"
+        cellRender={RenderPercentCell}
+        visible={false}
       />
       <Column
         caption="52 Week"
@@ -427,14 +663,14 @@ export const AssetsTable = (props: any) => {
       <Column
         caption="YTD"
         minWidth={100}
+        width={100}
         alignment="center"
         dataField="ytdPrice"
         cellRender={RenderHistoryPercentCell}
-        visible={false}
       />
       <Column
         caption="1 Week"
-        minWidth={100}
+        minWidth={80}
         alignment="center"
         dataField="wkPrice1"
         cellRender={RenderHistoryPercentCell}
@@ -467,10 +703,10 @@ export const AssetsTable = (props: any) => {
       <Column
         caption="1 Year"
         minWidth={100}
+        width={100}
         alignment="center"
         dataField="yearPrice1"
         cellRender={RenderHistoryPercentCell}
-        visible={false}
       />
       <Column
         caption="Note"
@@ -478,6 +714,38 @@ export const AssetsTable = (props: any) => {
         alignment="center"
         dataField="note"
         visible={false}
+      />
+      <Column
+        caption="Target"
+        minWidth={80}
+        width={80}
+        alignment="center"
+        dataField="target"
+        fixed={true}
+        fixedPosition="right"
+        headerCellRender={renderHeaderTargetAndActual}
+        cellRender={renderTarget}
+      />
+      <Column
+        caption="Actual"
+        minWidth={80}
+        width={80}
+        alignment="center"
+        dataField="actual"
+        fixed={true}
+        fixedPosition="right"
+        headerCellRender={renderHeaderTargetAndActual}
+        cellRender={RenderPercentCell}
+      />
+      <Column
+        caption="Diff"
+        minWidth={100}
+        width={100}
+        alignment="center"
+        dataField="different"
+        fixed={true}
+        fixedPosition="right"
+        cellRender={RenderDiffentCell}
       />
     </DataGridCustomStyle>
   );

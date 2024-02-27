@@ -25,14 +25,14 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <div className="min-h-screen"   >
+      <body className={inter.className} style={{ overflow: "hidden" }}>
+        <div className="min-h-screen">
           <div className="flex">
             <ThemeProvider theme={darkTheme}>
               <Sidebar show={showSidebar} setter={setShowSidebar} />
               <div className="bg-[#191A19] flex flex-col flex-grow w-screen md:w-full min-h-screen">
                 <div className="m-5" style={{ height: "100%" }}>
-                  <Box color="white" sx={{ height: "100%" }}>
+                  <Box color="white" sx={{ height: "95%" }}>
                     <Card
                       sx={{
                         marginBottom: "20px",
