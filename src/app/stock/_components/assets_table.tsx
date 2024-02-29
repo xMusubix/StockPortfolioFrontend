@@ -339,7 +339,7 @@ export const AssetsTable = (props: any) => {
         sx={{
           backgroundColor: getColorForDifferent(value),
           height: 35,
-          width: 70,
+          width: 90,
           "& .MuiChip-label": {
             color: "#000000",
             fontSize: "16px",
@@ -738,7 +738,7 @@ export const AssetsTable = (props: any) => {
         cellRender={RenderPercentCell}
       />
       <Column
-        caption="Diff"
+        caption="Different"
         minWidth={100}
         width={100}
         alignment="center"

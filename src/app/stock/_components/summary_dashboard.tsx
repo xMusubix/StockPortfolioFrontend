@@ -75,6 +75,15 @@ export const SummaryDashboard = (props: any) => {
 };
 export const SummeryOtherDetails = (props: any) => {
   const data = props.data;
+  const tableData = props.tableData;
+
+  const calculatePriceChangePercentage = (
+    lastPrice: any,
+    previousPrice: any
+  ) => {
+    let differenceYtdPrice = lastPrice - previousPrice;
+    return (differenceYtdPrice / previousPrice) * 100;
+  };
   return (
     <Grid
       container
@@ -99,8 +108,20 @@ export const SummeryOtherDetails = (props: any) => {
             }}
           >
             <ReturnDetails
-              percent={data.changePercentageUSD}
-              value={data.changeUSD}
+              percent={calculatePriceChangePercentage(
+                data.totalHoldingUSD,
+                data.totalHoldingUSD +
+                  -tableData.reduce(
+                    (accumulator: any, item: any) =>
+                      accumulator + item.dailyCostGain,
+                    0
+                  )
+              )}
+              value={tableData.reduce(
+                (accumulator: any, item: any) =>
+                  accumulator + item.dailyCostGain,
+                0
+              )}
               text="Daily Return"
               type="usd"
             />

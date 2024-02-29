@@ -61,10 +61,8 @@ export default function Sidebar({ show, setter }: any) {
         <div className="flex flex-col">
           <MenuItem name="Dashboard" route="/" icon={<MdDashboard />} />
           <MenuItem name="Stock" route="/stock" icon={<IoMdPie />} />
-          <MenuItem name="Heat Map" route="/hats" icon={<IoMdGrid />} />
-          <MenuItem name="Dividend" route="/dividend" icon={<GiCash />} />
-          <MenuItem name="E-Class" route="/contact" icon={<BiSolidBank />} />
-          <MenuItem name="Saving" route="/saving" icon={<MdSavings />} />
+          <MenuItem name="Heat Map" route="/heat-map" icon={<IoMdGrid />} />
+          <MenuItem name="Savings" route="/saving" icon={<MdSavings />} />
           <MenuItem name="Setup" route="/setup" icon={<FaGear />} />
         </div>
       </div>

@@ -142,7 +142,11 @@ const StockPortfolio = (props: any) => {
                   placeSelf: "center",
                 }}
               >
-                {dashboard ? <SummeryOtherDetails data={dashboard} /> : <></>}
+                {dashboard ? (
+                  <SummeryOtherDetails data={dashboard} tableData={tableData}/>
+                ) : (
+                  <></>
+                )}
               </Grid>
               <Grid
                 item

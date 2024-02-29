@@ -17,9 +17,9 @@ import { IoMdAddCircle } from "react-icons/io";
 import { BootstrapDialog } from "../../_components/styled";
 import { NumericFormatTHB } from "@/app/_utils/input_mask";
 import { Transition } from "@/app/_utils/dialog_utils";
-import { SaveTrsaving } from "../_api/api_saving";
+import { SaveTrSavings } from "../_api/api_savings";
 
-export const AddSavingTransactionDialog = (props: any) => {
+export const AddSavingsTransactionDialog = (props: any) => {
   const [date, setDate] = useState<string | null>(
     dayjs(new Date()).format("YYYY-MM-DD")
   );
@@ -31,7 +31,7 @@ export const AddSavingTransactionDialog = (props: any) => {
   const saveTrc = () => {
     setAmount("");
     setNote("");
-    SaveTrsaving(
+    SaveTrSavings(
       {
         date: date,
         type: type,
@@ -46,15 +46,15 @@ export const AddSavingTransactionDialog = (props: any) => {
   useEffect(() => {
     setAmount("");
     setNote("");
-  }, [props.savingDialogState]);
+  }, [props.SavingsDialogState]);
 
   return (
     <BootstrapDialog
       onClose={() => {
-        props.setSavingDialogState(false);
+        props.setSavingsDialogState(false);
       }}
       aria-labelledby="customized-dialog-title"
-      open={props.savingDialogState}
+      open={props.SavingsDialogState}
       TransitionComponent={Transition}
       fullWidth={true}
       maxWidth="sm"
@@ -63,7 +63,7 @@ export const AddSavingTransactionDialog = (props: any) => {
       }}
     >
       <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-        <p className="text-[20px]">Add Saving</p>
+        <p className="text-[20px]">Add Savings</p>
       </DialogTitle>
       <DialogContent>
         <div className="mb-5">

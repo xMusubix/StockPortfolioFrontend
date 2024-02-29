@@ -23,6 +23,7 @@ export const ReturnDetails = (props: any) => {
     </div>
   );
 };
+
 export const ReturnDetailsNoText = (props: any) => {
   const { percent, value, type, textSize = [24, 18] } = props;
 
@@ -35,11 +36,69 @@ export const ReturnDetailsNoText = (props: any) => {
       }}
     >
       <div>
-        <div style={{ margin: 0 }}>
+        <div>
           <FormatValue value={percent} textSize={textSize[0]} type="percent" />
         </div>
         <div>
           <FormatValue value={value} textSize={textSize[1]} type={type} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const ReturnDetailsDashboardNoText = (props: any) => {
+  const { percent, value } = props;
+  let textClass = "text-center";
+
+  const checkPercent = () => {
+    if (percent > 0) return "▲ ";
+    else if (percent < 0) return "▼ ";
+    else if (percent === 0) return "";
+  };
+
+  if (percent > 0) {
+    textClass += " text-[green]";
+  } else if (percent < 0) {
+    textClass += " text-[red]";
+  } else {
+    textClass += " text-[white]";
+  }
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div>
+        <div style={{ margin: "5px", marginBottom: "10px" }}>
+          <p className="text-[white] text-[30px] leading-1">
+            ฿
+            {value
+              ? value.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })
+              : 0}
+          </p>
+        </div>
+        <div style={{ margin: 2 }}>
+          <p
+            className={`${textClass}`}
+            style={{ fontSize: "30px", lineHeight: "22px" }}
+          >
+            {checkPercent()}
+            {percent
+              ? percent.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })
+              : 0}
+            %
+          </p>
         </div>
       </div>
     </div>
@@ -116,7 +175,6 @@ export const OtherDetails = (props: any) => {
     </div>
   );
 };
-
 
 export const OtherDetailsPercent = (props: any) => {
   const { value, text } = props;

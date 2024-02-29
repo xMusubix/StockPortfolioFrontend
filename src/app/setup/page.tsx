@@ -19,6 +19,7 @@ import { IoIosAddCircle } from "react-icons/io";
 import { AddWatchlistDialog } from "./_components/dialog";
 import { LoadSectorData, LoadSymbolData } from "./_api/api_setup";
 
+
 type WatchlistData = {
   market: string;
   symbol: string;

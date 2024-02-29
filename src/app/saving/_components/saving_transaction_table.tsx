@@ -4,9 +4,9 @@ import { Box, Stack } from "@mui/system";
 import { Column } from "devextreme-react/data-grid";
 import { useEffect, useState } from "react";
 import { IoIosRemoveCircle, IoMdAddCircle } from "react-icons/io";
-import { DeleteTrsaving } from "../_api/api_saving";
+import { DeleteTrSavings } from "../_api/api_savings";
 
-export const SavingTransactionTable = (props: any) => {
+export const SavingsTransactionTable = (props: any) => {
   const RenderThbCell = (rowData: any) => {
     const displayValue = rowData.displayValue;
     return (
@@ -23,7 +23,7 @@ export const SavingTransactionTable = (props: any) => {
       <IconButton
         sx={{ padding: "5px" }}
         onClick={() => {
-          DeleteTrsaving(rowData.data.id, props.LoadSavingTrnsaction);
+          DeleteTrSavings(rowData.data.id, props.LoadSavingsTrnsaction);
         }}
       >
         <IoIosRemoveCircle size={25} color="red" />
@@ -53,7 +53,7 @@ export const SavingTransactionTable = (props: any) => {
                 backgroundColor: "#b3ffc0",
               },
             }}
-            onClick={() => props.setSavingDialogState(true)}
+            onClick={() => props.setSavingsDialogState(true)}
           >
             Add Transaction
           </Button>

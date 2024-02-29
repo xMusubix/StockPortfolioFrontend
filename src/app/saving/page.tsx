@@ -12,23 +12,27 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { SavingTransactionTable } from "./_components/saving_transaction_table";
-import { AddSavingTransactionDialog } from "./_components/dialog";
+import { SavingsTransactionTable } from "./_components/saving_transaction_table";
+import { AddSavingsTransactionDialog } from "./_components/dialog";
 import { useEffect, useState } from "react";
-import { LoadTrsavingList, LoadTrsavingSummaryList } from "./_api/api_saving";
+import {
+  LoadTrSavingsList,
+  LoadTrSavingsSummaryList,
+} from "./_api/api_savings";
+import { SummarySavings } from "./_components/summary";
 
-const StockPortfolio = (props: any) => {
-  const [savingDialogState, setSavingDialogState] = useState(false);
+const SavingPortfolio = (props: any) => {
+  const [SavingsDialogState, setSavingsDialogState] = useState(false);
   const [tableData, setTableData] = useState();
   const [summaryData, setSummaryData] = useState([]);
 
   useEffect(() => {
-    LoadSavingTrnsaction();
+    LoadSavingsTrnsaction();
   }, []);
 
-  const LoadSavingTrnsaction = () => {
-    LoadTrsavingList(setTableData);
-    LoadTrsavingSummaryList(setSummaryData);
+  const LoadSavingsTrnsaction = () => {
+    LoadTrSavingsList(setTableData);
+    LoadTrSavingsSummaryList(setSummaryData);
   };
 
   return (
@@ -49,76 +53,10 @@ const StockPortfolio = (props: any) => {
             height: "50px !important",
           }}
         >
-          <Typography>Summary Saving</Typography>
+          <Typography>Summary Savings</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <Box color="white" sx={{ display: "flex", justifyContent: "center" }}>
-            <Stack spacing={3} direction="row">
-              <Card
-                sx={{
-                  backgroundColor: "#2E2F2E",
-                  display: "flex",
-                  alignContent: "center",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <CardContent>
-                  <Stack
-                    spacing={0}
-                    direction="row"
-                    textAlign="center"
-                    justifyContent="center"
-                  >
-                    <p className="text-[40px] font-normal">
-                      Total Saving :&nbsp;
-                    </p>
-                    <p className="text-[40px] font-normal">
-                      {summaryData
-                        ? summaryData
-                            .reduce(
-                              (accumulator, item: any) =>
-                                accumulator + item.amount,
-                              0
-                            )
-                            .toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })
-                        : null}
-                    </p>
-                  </Stack>
-                </CardContent>
-              </Card>
-              {summaryData
-                ? summaryData.map((item: any) => (
-                    <Card
-                      key={item.application}
-                      sx={{ backgroundColor: "#2E2F2E" }}
-                    >
-                      <CardContent>
-                        <Stack
-                          spacing={0}
-                          direction="column"
-                          textAlign="center"
-                        >
-                          <p className="text-[30px] font-normal">
-                            {item.application}
-                          </p>
-                          <p className="text-[20px] font-normal">
-                            ฿
-                            {item.amount.toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </p>
-                        </Stack>
-                      </CardContent>
-                    </Card>
-                  ))
-                : null}
-            </Stack>
-          </Box>
+          <SummarySavings summaryData={summaryData} />
         </AccordionDetails>
       </Accordion>
       <div className="mb-5">
@@ -130,23 +68,23 @@ const StockPortfolio = (props: any) => {
           <Card>
             <CardContent>
               <Box>
-                <SavingTransactionTable
-                  setSavingDialogState={setSavingDialogState}
+                <SavingsTransactionTable
+                  setSavingsDialogState={setSavingsDialogState}
                   tableData={tableData}
-                  LoadSavingTrnsaction={LoadSavingTrnsaction}
+                  LoadSavingsTrnsaction={LoadSavingsTrnsaction}
                 />
               </Box>
             </CardContent>
           </Card>
         </Box>
       </div>
-      <AddSavingTransactionDialog
-        savingDialogState={savingDialogState}
-        setSavingDialogState={setSavingDialogState}
-        onSuccess={LoadSavingTrnsaction}
+      <AddSavingsTransactionDialog
+        SavingsDialogState={SavingsDialogState}
+        setSavingsDialogState={setSavingsDialogState}
+        onSuccess={LoadSavingsTrnsaction}
       />
     </div>
   );
 };
 
-export default StockPortfolio;
+export default SavingPortfolio;

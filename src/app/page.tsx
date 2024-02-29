@@ -1,119 +1,457 @@
-import Image from "next/image";
-import Link from "next/link";
+"use client";
 
-export const metadata = {
-  title: "Home",
+import {
+  Box,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
+  IconButton,
+  List,
+  Paper,
+  Stack,
+} from "@mui/material";
+import { LoadTrSavingsSummaryList } from "./saving/_api/api_savings";
+import { useEffect, useState } from "react";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  Title,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement,
+} from "chart.js";
+import { Doughnut, Bar, Line } from "react-chartjs-2";
+import ChartDataLabels from "chartjs-plugin-datalabels";
+import { faker } from "@faker-js/faker";
+import { FiRefreshCw } from "react-icons/fi";
+import { ReturnDetailsDashboardNoText } from "./stock/_components/details";
+import { LoadDashboard } from "./_api/api_dashboard";
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  Title,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  LineElement,
+  BarElement,
+  ChartDataLabels
+);
+
+ChartJS.register(ArcElement, Tooltip, Legend, Title, ChartDataLabels);
+
+const monthLabel = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const colorList = [
+  "rgb(255, 99, 132)",
+  "rgb(255, 159, 64)",
+  "rgb(75, 192, 192)",
+  "rgb(153, 102, 255)",
+  "rgb(53, 162, 235)",
+  "rgb(255, 205, 86)",
+  "rgb(255, 99, 132)",
+  "rgb(75, 192, 192)",
+  "rgb(255, 159, 64)",
+  "rgb(201, 203, 207)",
+  "rgb(255, 205, 86)",
+];
+
+type DashboardType = {
+  totalBalance: number;
+  totalStock: number;
+  totalStockPercent: number;
+  changePercentageTHB: number;
+  totalSavings: number;
+  totalSavingsPercent: number;
+  savingSummaryPayloads: [];
+  barChartDataList: [];
+  lineChartData: LineChartData;
+};
+
+type LineChartData = {
+  labels: [];
+  dividendAmount: [];
 };
 
 export default function Home() {
+  const [summaryData, setSummaryData] = useState<DashboardType>();
+  const [chartState, setChartState] = useState(false);
+
+  useEffect(() => {
+    LoadData();
+    const intervalId = setInterval(() => {
+      LoadData();
+    }, 60000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const LoadData = () => {
+    LoadDashboard(setSummaryData);
+  };
+
+  const portData = {
+    labels: ["Savings", "Dime Stock"],
+    datasets: [
+      {
+        label: "Portfolio",
+        data: [
+          summaryData ? summaryData.totalSavingsPercent.toFixed(2) : 0,
+          summaryData ? summaryData.totalStockPercent.toFixed(2) : 0,
+        ],
+        backgroundColor: ["rgba(255, 165, 50, 0.7)", "rgba(0,240, 125, 0.7)"],
+        borderColor: ["rgba(255, 165, 50, 1)", "rgba(0,240, 125, 1)"],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const barData = {
+    labels: monthLabel,
+    datasets: summaryData
+      ? summaryData.barChartDataList.map((item: any, index: any) => ({
+          label: item.year,
+          data: item.dividendAmount.map((amount: number) => amount.toFixed(2)),
+          backgroundColor: colorList[index % colorList.length],
+        }))
+      : [],
+  };
+
+  const lineData = {
+    labels: summaryData ? summaryData.lineChartData.labels : [""],
+    datasets: [
+      {
+        label: "Dividend",
+        data: summaryData
+          ? summaryData.lineChartData.dividendAmount.map((amount: number) =>
+              amount.toFixed(2)
+            )
+          : [0],
+        borderColor: "rgb(53, 162, 235)",
+        backgroundColor: "rgba(53, 162, 235, 0.5)",
+      },
+    ],
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-          <Link href="/products">Go to products</Link>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <Box sx={{ height: "400px" }}>
+      <Grid container spacing={2} height="100%" textAlign="center">
+        <Grid item xs={5} height="100%">
+          <Card
+            sx={{
+              height: "100%",
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+            <CardContent>
+              <div>
+                <p className="text-[40px]">Total Balance</p>
+                <p className="text-[60px]">
+                  ฿
+                  {summaryData
+                    ? summaryData.totalBalance.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })
+                    : 0}
+                </p>
+              </div>
+              <Divider
+                orientation="horizontal"
+                sx={{
+                  margin: "20px",
+                  width: "600px",
+                  borderBottom: "3px dotted #8B8B8B",
+                }}
+              />
+              <div>
+                <p className="text-[25px]">Dime Stock</p>
+                <ReturnDetailsDashboardNoText
+                  percent={summaryData ? summaryData.changePercentageTHB : 0}
+                  value={summaryData ? summaryData.totalStock : 0}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={4} height="100%">
+          <Card
+            sx={{
+              height: "100%",
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <CardContent>
+              <Stack spacing={3}>
+                <div>
+                  <p className="text-[30px]">Total Savings</p>
+                  <p className="text-[50px]">
+                    ฿
+                    {summaryData
+                      ? summaryData.totalSavings.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })
+                      : 0}
+                  </p>
+                </div>
+                <div
+                  style={{
+                    backgroundColor: "#2E2F2E",
+                    overflow: "auto",
+                    display: "block",
+                    whiteSpace: "nowrap",
+                    maxWidth: 500,
+                    justifyContent: "space-between",
+                    textAlignLast: "center",
+                  }}
+                >
+                  {summaryData
+                    ? summaryData.savingSummaryPayloads.map((item: any) => (
+                        <Card
+                          key={item.application}
+                          sx={{
+                            backgroundColor: "#2E2F2E",
+                            display: "inline-block",
+                            margin: 1,
+                          }}
+                        >
+                          <CardContent>
+                            <Stack
+                              spacing={0}
+                              direction="column"
+                              textAlign="center"
+                            >
+                              <p className="text-[30px] font-normal">
+                                {item.application}
+                              </p>
+                              <p className="text-[20px] font-normal">
+                                ฿
+                                {item.amount.toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
+                              </p>
+                            </Stack>
+                          </CardContent>
+                        </Card>
+                      ))
+                    : null}
+                </div>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={3} height="100%">
+          <Card sx={{ height: "100%", borderRadius: "8px", width: "100%" }}>
+            <CardContent
+              sx={{ height: "100%", borderRadius: "8px", width: "100%" }}
+            >
+              <Doughnut
+                data={portData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  layout: {
+                    padding: 5,
+                  },
+                  plugins: {
+                    datalabels: {
+                      formatter: (value) => {
+                        return value + "%";
+                      },
+                      color: "#FFFFFF",
+                      font: {
+                        weight: "bold",
+                        size: 14,
+                      },
+                    },
+                    legend: {
+                      display: true,
+                      position: "bottom",
+                    },
+                    title: {
+                      display: true,
+                      text: "Total Portfolio",
+                      color: "#FFFFFF",
+                      font: {
+                        weight: "bold",
+                        size: 20,
+                      },
+                    },
+                  },
+                }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} height="100%">
+          <Card sx={{ height: "100%", borderRadius: "8px", width: "100%" }}>
+            <CardContent
+              sx={{
+                height: "100%",
+                borderRadius: "8px",
+                width: "100%",
+              }}
+            >
+              <IconButton
+                sx={{
+                  backgroundColor: "transparent !important",
+                  marginRight: 2,
+                  marginTop: "5px",
+                  position: "absolute",
+                  zIndex: 2,
+                  right: "29px",
+                  top: "437px",
+                }}
+                onClick={() => setChartState(!chartState)}
+              >
+                <FiRefreshCw size={20} />
+              </IconButton>
+              <Box
+                sx={{ display: chartState ? "none" : "flex", height: "100%" }}
+              >
+                <Bar
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                      padding: 5,
+                    },
+                    plugins: {
+                      datalabels: {
+                        display: true,
+                        color: "#ffffff",
+                        font: {
+                          weight: "bold",
+                          size: 14,
+                        },
+                        formatter: (value) => {
+                          return "$" + value;
+                        },
+                      },
+                      title: {
+                        display: true,
+                        text: "Dividend Summary",
+                      },
+                      legend: {
+                        display: true,
+                        position: "bottom",
+                        labels: {
+                          color: "#FFFFFF",
+                        },
+                      },
+                    },
+                    scales: {
+                      x: {
+                        ticks: {
+                          font: {
+                            size: 14,
+                          },
+                          color: "#ffffff",
+                        },
+                        stacked: true,
+                      },
+                      y: {
+                        ticks: {
+                          font: {
+                            size: 14,
+                          },
+                          color: "#ffffff",
+                        },
+                        stacked: true,
+                      },
+                    },
+                  }}
+                  data={barData}
+                />
+              </Box>
+              <Box
+                sx={{ display: chartState ? "flex" : "none", height: "100%" }}
+              >
+                <Line
+                  options={{
+                    scales: {
+                      x: {
+                        ticks: {
+                          font: {
+                            size: 14,
+                          },
+                          color: "#ffffff",
+                        },
+                      },
+                      y: {
+                        ticks: {
+                          font: {
+                            size: 14,
+                          },
+                          color: "#ffffff",
+                        },
+                      },
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                      padding: 5,
+                    },
+                    plugins: {
+                      datalabels: {
+                        anchor: "end",
+                        align: "top",
+                        display: true,
+                        color: "#ffffff",
+                        font: {
+                          weight: "bold",
+                          size: 14,
+                        },
+                        formatter: (value) => {
+                          return "$" + value;
+                        },
+                      },
+                      title: {
+                        display: true,
+                        text: "Dividend Summary",
+                      },
+                      legend: {
+                        display: true,
+                        position: "bottom",
+                        labels: {
+                          color: "#FFFFFF",
+                        },
+                      },
+                    },
+                  }}
+                  data={lineData}
+                />
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }

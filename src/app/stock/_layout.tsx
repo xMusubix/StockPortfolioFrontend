@@ -1,7 +1,7 @@
 import { Box, Card, CardContent } from "@mui/material";
 
 export const metadata = {
-  title: "Products",
+  title: "Stock",
 };
 
 export default function RootLayout({
