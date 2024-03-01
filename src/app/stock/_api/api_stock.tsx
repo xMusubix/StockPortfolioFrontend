@@ -23,8 +23,15 @@ export const LoadSummaryAssetsData = async (setDatas: any) => {
     setDatas(res.data);
   });
 };
+
 export const LoadDashboardData = async (setDatas: any) => {
   await http.get(`${"/api/v1/assets/dashboard"}`).then((res: any) => {
+    setDatas(res.data);
+  });
+};
+
+export const LoadSumTargetBySectorData = async (setDatas: any) => {
+  await http.get(`${"/api/v1/assets/sum-sector"}`).then((res: any) => {
     setDatas(res.data);
   });
 };

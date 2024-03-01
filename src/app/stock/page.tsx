@@ -9,12 +9,13 @@ import {
   Card,
   CardContent,
   Grid,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
   LoadAssetsList,
   LoadDashboardData,
+  LoadSumTargetBySectorData,
   LoadSummaryAssetsData,
 } from "./_api/api_stock";
 import { AssetsTable } from "./_components/assets_table";
@@ -28,6 +29,7 @@ import {
   SummaryDashboard,
   SummeryOtherDetails,
 } from "./_components/summary_dashboard";
+import { SummarySectorChart } from "./_components/summary_sector_chart";
 
 type DashboardDataType = {
   totalHoldingUSD: number;
@@ -50,9 +52,11 @@ const StockPortfolio = (props: any) => {
     useState(false);
   const [transactionDialogState, setTransactionDialogState] = useState(false);
   const [addAssetsDialogState, setAddAssetsDialogState] = useState(false);
+  const [compareSectorState, setCompareSectorState] = useState(false);
   const [assetsToView, setAssetsToView] = useState({});
   const [tableData, setTableData] = useState([]);
   const [summaryAssets, setSummaryAssets] = useState({});
+  const [sumTargetBySector, setSumTargetBySector] = useState([]);
   const [dashboard, setDashboard] = useState<DashboardDataType>();
   const [tableSize, setTableSize] = useState(440);
 
@@ -85,6 +89,7 @@ const StockPortfolio = (props: any) => {
     LoadAssetsList(setTableData);
     LoadSummaryAssetsData(setSummaryAssets);
     LoadDashboardData(setDashboard);
+    LoadSumTargetBySectorData(setSumTargetBySector);
   };
 
   return (
@@ -143,7 +148,7 @@ const StockPortfolio = (props: any) => {
                 }}
               >
                 {dashboard ? (
-                  <SummeryOtherDetails data={dashboard} tableData={tableData}/>
+                  <SummeryOtherDetails data={dashboard} tableData={tableData} />
                 ) : (
                   <></>
                 )}
@@ -195,6 +200,7 @@ const StockPortfolio = (props: any) => {
                   }
                   setAddAssetsDialogState={setAddAssetsDialogState}
                   openTransactionDialog={openTransactionDialog}
+                  setCompareSectorState={setCompareSectorState}
                 />
               </Box>
             </CardContent>
@@ -214,6 +220,11 @@ const StockPortfolio = (props: any) => {
         addAssetsDialogState={addAssetsDialogState}
         setAddAssetsDialogState={setAddAssetsDialogState}
         LoadAssets={LoadAssets}
+      />
+      <SummarySectorChart
+        compareSectorState={compareSectorState}
+        setCompareSectorState={setCompareSectorState}
+        sumTargetBySector={sumTargetBySector}
       />
     </div>
   );

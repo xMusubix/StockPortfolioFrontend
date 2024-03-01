@@ -28,6 +28,7 @@ import { LoadAssetsList, UpdateTarget } from "../_api/api_stock";
 import { Tune } from "@mui/icons-material";
 import { constants } from "fs/promises";
 import dayjs from "dayjs";
+import { FaChartBar } from "react-icons/fa6";
 
 export const AssetsTable = (props: any) => {
   const summaryAssets = props.summaryAssets;
@@ -481,16 +482,34 @@ export const AssetsTable = (props: any) => {
           </Stack>
         </Item>
         <Item location="after">
-          <IconButton
-            sx={{
-              backgroundColor: "transparent !important",
-              marginRight: 2,
-              marginTop: "5px",
-            }}
-            onClick={() => props.LoadAssets()}
+          <Stack
+            direction="row"
+            spacing={2}
+            justifyContent="center"
+            marginRight={2}
+            marginTop="5px"
           >
-            <FiRefreshCw size={20} />
-          </IconButton>
+            <IconButton
+              sx={{
+                backgroundColor: "transparent !important",
+                marginRight: 2,
+                marginTop: "5px",
+              }}
+              onClick={() => props.LoadAssets()}
+            >
+              <FiRefreshCw size={20} />
+            </IconButton>
+            <IconButton
+              sx={{
+                backgroundColor: "transparent !important",
+                marginRight: 2,
+                marginTop: "5px",
+              }}
+              onClick={() => props.setCompareSectorState(true)}
+            >
+              <FaChartBar size={20} />
+            </IconButton>
+          </Stack>
         </Item>
         <Item name="columnChooserButton" />
         <Item name="searchPanel" />
