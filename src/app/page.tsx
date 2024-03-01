@@ -82,6 +82,8 @@ type DashboardType = {
   changePercentageTHB: number;
   totalSavings: number;
   totalSavingsPercent: number;
+  sumDividendUsd: number;
+  sumDividendThb: number;
   savingSummaryPayloads: [];
   barChartDataList: [];
   lineChartData: LineChartData;
@@ -318,6 +320,23 @@ export default function Home() {
                 width: "100%",
               }}
             >
+              <p>
+                Total Dividend Earned : ${""}
+                {summaryData
+                  ? summaryData.sumDividendUsd.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })
+                  : 0.0}{" "}
+                ≈{" "}
+                {summaryData
+                  ? summaryData.sumDividendThb.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })
+                  : 0.0}
+                ฿
+              </p>
               <IconButton
                 sx={{
                   backgroundColor: "transparent !important",
@@ -351,7 +370,16 @@ export default function Home() {
                           size: 14,
                         },
                         formatter: (value) => {
-                          return "$" + value;
+                          if (
+                            value === 0 ||
+                            value === 0.0 ||
+                            value === "0" ||
+                            value === "0.0" ||
+                            value === "0.00" ||
+                            value === null
+                          )
+                            return null;
+                          else return "$" + value;
                         },
                       },
                       title: {
