@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@mui/material";
 import { MdDelete } from "react-icons/md";
+import { DeleteSymbol } from "../_api/api_setup";
 
 const WatchlistTable = (props: any) => {
   const datas = props.datas;
@@ -40,7 +41,10 @@ const WatchlistTable = (props: any) => {
               <TableCell align="center">{data.market}</TableCell>
               <TableCell align="center">{data.symbol}</TableCell>
               <TableCell align="center">
-                <IconButton aria-label="delete">
+                <IconButton
+                  aria-label="delete"
+                  onClick={() => DeleteSymbol(data.id, props.loadData)}
+                >
                   <MdDelete />
                 </IconButton>
               </TableCell>

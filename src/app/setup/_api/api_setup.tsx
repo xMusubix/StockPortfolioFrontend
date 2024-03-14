@@ -43,3 +43,13 @@ export const LoadSectorData = async (setDatas: any) => {
     setDatas(res.data);
   });
 };
+
+export const DeleteSymbol = async (id: any, onComplete: any) => {
+  await http
+    .delete(`${"/api/v1/watchlist"}`, {
+      params: { id },
+    })
+    .then((res: any) => {
+      onComplete();
+    });
+};

@@ -19,7 +19,6 @@ import { IoIosAddCircle } from "react-icons/io";
 import { AddWatchlistDialog } from "./_components/dialog";
 import { LoadSectorData, LoadSymbolData } from "./_api/api_setup";
 
-
 type WatchlistData = {
   market: string;
   symbol: string;
@@ -43,9 +42,13 @@ export default function Setup() {
   const [sectorDatas, setSectorDatas] = useState<SectorData[]>([]);
 
   useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = () => {
     LoadSymbolData(setWatchlistDatas);
     LoadSectorData(setSectorDatas);
-  }, []);
+  };
 
   return (
     <div>
@@ -69,7 +72,7 @@ export default function Setup() {
               </IconButton>
             </div>
           </Stack>
-          <WatchlistTable datas={watchlistDatas} />
+          <WatchlistTable datas={watchlistDatas} loadData={loadData} />
         </Paper>
       </Stack>
       <AddWatchlistDialog
